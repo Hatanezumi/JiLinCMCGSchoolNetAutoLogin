@@ -10,8 +10,10 @@ from src.AutoLogin import AutoLogin, LoginStatus
 def net_test() -> bool:
     try:
         print('正在进行联网测试')
-        res = requests.get('http://baidu.com', timeout=5)
-        return res.status_code == 200
+        res = requests.get('http://baidu.com', timeout=3)
+        if res.status_code != 200:
+            return False
+        return '百度' in res.text
     except:
         return False
 
