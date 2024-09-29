@@ -5,9 +5,8 @@
 '''
 import requests
 from . import Errors
+from .Color import Color
 from bs4 import BeautifulSoup, ResultSet, element
-
-version = '1.0.0'
 
 HEADER = {
     'sec-ch-ua':'"Chromium";v="94", "Microsoft Edge";v="94", ";Not A Brand";v="99"',
@@ -24,11 +23,15 @@ class LoginStatus:
     LOGINPROBABLE = '登录可能成功'
 
 class AutoLogin:
-    def __init__(self, user: str, password: str = '112233') -> None:
+    def __init__(self, user: str, password: str = '112233', print_info: bool = True) -> None:
         self.user = user
         self.password = password
+        self.print_info = True
+    def __print(self, text: str, color: Color = Color.DEFAULT) -> None:
+        if self.print_info:
+            print(f'\033[0;{color}m{text}\033[0m')
     def __get_page(self, link: str) -> requests.Response:
-        res = requests.get(link,headers=HEADER)
+        res = requests.get(link, headers=HEADER)
         if res.status_code != 200:
             raise Errors.StatusCodeException(res.status_code)
         return res
@@ -80,9 +83,9 @@ class AutoLogin:
             raise Errors.StatusCodeException(res.status_code)
         try:
             info = res.text.split('$("#info").text("',1)[1].split('");',1)[0]
-            print(info)
+            self.__print(info, Color.YELLOW)
             if info == '系统正忙，请稍候重试':
-                print('可能已成功登录,请自行验证')
+                self.__print('可能已成功登录,请自行验证', Color.YELLOW)
                 return (LoginStatus.LOGINPROBABLE, None)
         except:
             return (LoginStatus.LOGINSUCCESS, res.text)
@@ -91,25 +94,22 @@ class AutoLogin:
         res = requests.post(post_link, headers=HEADER, data=data)
         if res.status_code != 200:
             raise Errors.StatusCodeException(res.status_code)
-        if '已登录' in res.text:
-            return LoginStatus.LOGINSUCCESS
-        else:
-            return LoginStatus.LOGINFAILED
+        return LoginStatus.LOGINSUCCESS if '已登录' in res.text else LoginStatus.LOGINFAILED
     def auto_login(self) -> LoginStatus:
         try:
             login_link = self.__get_login_page_link()
-            print(f'login_link获取成功:{login_link}')
+            self.__print(f'login_link获取成功:{login_link}', Color.GREEN)
             post_link, data = self.__analyze_login_page(login_link)
-            print(f'post_link及数据获取成功:{post_link}')
+            self.__print(f'post_link及数据获取成功:{post_link}', Color.GREEN)
             login_type, page = self.__post_login(post_link, data)
             if login_type != LoginStatus.LOGINSUCCESS:
                 return login_type
-            print('Post登录成功,查询结果')
+            self.__print('Post登录成功,查询结果', Color.GREEN)
             post_link, data = self.__analyze_post_page(page)
-            print(f'查询地址及数据获取成功:{post_link}')
+            self.__print(f'查询地址及数据获取成功:{post_link}', Color.GREEN)
             return self.__post_login_redirect(post_link, data)
         except Errors.AutoLoginException as err:
-            print(f'{err}')
+            self.__print(err, Color.RED)
             return LoginStatus.LOGINFAILED
         except:
             raise
