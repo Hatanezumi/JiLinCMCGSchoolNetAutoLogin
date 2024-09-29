@@ -8,3 +8,4 @@ class AutoLoginException(Exception): pass
 class StatusCodeException(AutoLoginException): pass
 class HtmlDecodeException(AutoLoginException): pass
 class VerifyCodeDetectedException(AutoLoginException): pass
+class NotLoginException(AutoLoginException): pass
