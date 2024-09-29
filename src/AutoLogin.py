@@ -61,7 +61,7 @@ class AutoLogin:
             raise HtmlDecodeException(f'未在页面中找到{attrs}')
         post_link = form.get('action')
         if not post_link:
-            raise HtmlDecodeException('未在loginForm中找到链接')
+            raise HtmlDecodeException(f'未在{attrs}中找到链接')
         inputs: ResultSet[element.Tag] = soup.find_all('input')
         data = {}
         for tag in inputs:
