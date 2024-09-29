@@ -13,7 +13,7 @@ def net_test() -> bool:
         res = requests.get('http://baidu.com', timeout=3)
         if res.status_code != 200:
             return False
-        return '百度' in res.text
+        return 'baidu' in res.text
     except:
         return False
 
